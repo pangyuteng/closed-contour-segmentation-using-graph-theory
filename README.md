@@ -1,5 +1,5 @@
 ### Closed-contour segmentation using graph theory and dynamic programming
-### Usage
+#### Usage.
     
 see `demo.ipynb` for usage.
 
@@ -8,7 +8,7 @@ see `demo.ipynb` for usage.
 
 ![alt text](images/demo.png)
 
-### Reference
+#### Reference.
 
 Chiu SJ, Toth CA, Rickman CB, Izatt JA, Farsiu S. Automatic segmentation of closed-contour features in ophthalmic images using graph theory and dynamic programming. Biomedical optics express. 2012 May 1;3(5):1127-40.
 
