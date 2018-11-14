@@ -8,9 +8,6 @@ from scipy.spatial import Delaunay
 import networkx as nx
 from networkx.algorithms.shortest_paths.generic import shortest_path
 
-import qia.common.img.image as qiaimg
-from qia.common.temp import get_temp_file
-
 
 def in_hull(p, hull):
     """
@@ -126,15 +123,18 @@ def get_adjacency_matrix(img,max_radius_lim=None,epsilon=1e-5):
     return edge_weights, adjMAsub,adjMBsub
     
     
-def get_closed_contour(testimg,max_radius_lim=None):
+def get_closed_contour(testimg,max_radius_lim=None,phi_length=None):
 
     # build an image where
     # rho is from 0 to const*estimated_radius
     # phi is from -1 to 1
     rho_length = int((testimg.shape[0]+testimg.shape[1])/2)
+
     if max_radius_lim is None:
-        max_radius_lim = int(rho_length/3)
-    phi_length = int(2 * np.pi *max_radius_lim*2)
+        max_radius_lim = int(rho_length)
+
+    if phi_length is None:
+        phi_length = int(2 * np.pi *max_radius_lim/2)
     
     center = (int(testimg.shape[0]/2),int(testimg.shape[1]/2))
     
@@ -145,7 +145,7 @@ def get_closed_contour(testimg,max_radius_lim=None):
     
     # make coord in polar 
     rho_list = np.arange(0,rho_length,1)
-    phi_list = np.linspace(-np.pi,np.pi,phi_length)
+    phi_list = np.linspace(-np.pi,np.pi,num=phi_length,endpoint=True)
     r = np.array(rho_list)
     p = np.array(phi_list)
     RR,PP = np.meshgrid(r,p)
@@ -206,26 +206,32 @@ def get_closed_contour(testimg,max_radius_lim=None):
         mask=np.zeros(testimg.shape)
     return cart_x,cart_y,mask
 
-# get param from contour obtained using graph theory
-def get_params_from_closed_contour(image,return_blank=False):
-    if return_blank:
-        return {
-            'cc_path':[],
-            'cc_lumen_area': np.nan,
-            'cc_inner_diameter_from_lumen_area': np.nan,
-        }
 
-    px,py,mask = get_closed_contour(np.array(image.get_array().squeeze()))
+def get_test_image():
+    # create circle coord
+    radius = 20
+    t = np.linspace(0, 2 * np.pi, 20)
+    xc, yc = 30,30
+    a, b = radius, radius
+    x = xc + a * np.cos(t)
+    y = yc + b * np.sin(t)
+    data = np.column_stack([x, y])
+    np.random.seed(seed=1234)
+    # get hull
+    hull = spatial.Delaunay(data)
+
+    # get image grid
+    sz = int(xc/2+radius*2)
+    x = np.array(np.arange(0,sz,1))
+    y = np.array(np.arange(0,sz,1))
+    XX, YY = np.meshgrid(x, y)
+
+    # get image containing hull
+    a=np.array([XX.ravel(),YY.ravel()]).T
+    b=in_hull(a,hull)
+    c=np.reshape(b,(sz,sz))
+
+    # add noise to image
+    testimg = -1*( c+np.random.normal(loc=0.0, scale=0.2, size=c.shape))+1
     
-    # compute area
-    spacing_x,spacing_y,spacin_z = image.get_spacing()
-    total_in_hull = np.sum(mask)
-    lumen_area = total_in_hull*spacing_x*spacing_y
-    diameter = 2.0*np.sqrt(lumen_area/np.pi)
-    
-    params={}
-    params['cc_path'] = np.array([px,py])
-    params['cc_lumen_area'] = lumen_area
-    params['cc_inner_diameter_from_lumen_area'] = diameter        
-    return params
-    
+    return testimg
