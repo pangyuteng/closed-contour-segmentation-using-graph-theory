@@ -128,7 +128,7 @@ def segment_layer(pimg,dark2bright=True,ulim=None,llim=None):
     sp_x, sp_y = np.unravel_index(np.array(sp).astype(int),gradx.shape)
         
     # trim the path ( dont care about path at both sides of image)
-    keeps = np.logical_and(sp_y>1,sp_y<gradx.shape[1]-2)
+    keeps = np.logical_and(sp_y>1,sp_y<gradx.shape[1]-1)
     sp_x = sp_x[keeps]
     sp_y = sp_y[keeps]
     sp = np.array(sp).astype(int)[keeps]
