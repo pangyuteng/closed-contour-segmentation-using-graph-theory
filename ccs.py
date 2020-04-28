@@ -123,7 +123,7 @@ def get_adjacency_matrix(img,max_radius_lim=None,epsilon=1e-5):
     return edge_weights, adjMAsub,adjMBsub
     
     
-def get_closed_contour(testimg,max_radius_lim=None,phi_length=None):
+def get_closed_contour(testimg,center=None,max_radius_lim=None,phi_length=None):
 
     # build an image where
     # rho is from 0 to const*estimated_radius
@@ -136,7 +136,8 @@ def get_closed_contour(testimg,max_radius_lim=None,phi_length=None):
     if phi_length is None:
         phi_length = int(2 * np.pi *max_radius_lim/2)
     
-    center = (int(testimg.shape[0]/2),int(testimg.shape[1]/2))
+    if center is None:
+        center = (int(testimg.shape[0]/2),int(testimg.shape[1]/2))
     
     # make coord in cartesian
     x = np.array(np.arange(0,testimg.shape[0],1))
